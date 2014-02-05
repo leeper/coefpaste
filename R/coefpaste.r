@@ -9,9 +9,10 @@
 # val is a vector of values (e.g., regression coefficients)
 # par is a vector of parrenthetical values (e.g., standard errors)
 # digits is an optional two-item vector indicating the number of digits to which coefficients and errors should be rounded
-# stars is either a number specifying a threshold for adding a star to each output value (ratio of val to par) or a function taking two argumetns for generating a star (or stars)
+# stars.val is a function taking two arguments for generating a star (or stars) after the val
+# stars.par is a function taking two arguments for generating a star (or stars) after the parentheses
 
-coefpaste <- function(val,par,digits=c(2,2), stars=NULL){
+coefpaste <- function(val,par,digits=c(2,2), stars.val=NULL, stars.par=NULL){
 	if(length(digits)==1)
 		digits <- rep(digits,2)
 	# internal function
@@ -34,12 +35,12 @@ coefpaste <- function(val,par,digits=c(2,2), stars=NULL){
 			vchar <- nchar(as.numeric(strsplit(as.character(var),"[.]")[[1]][1])) + digits[2]
 			varout <- signif(var,vchar)
 		}
-		if(is.null(stars))
-			output <- paste(coefout," (",varout,")",sep="")
-		else if(is.numeric(stars))
-			output <- paste(coefout,if (abs(coef/var)>stars) '*' else ''," (",varout,")", sep="")
-		else
+		if(!is.null(stars.val))
 			output <- paste(coefout, stars(coef,var), " (",varout,")", sep="")
+		else if(!is.null(stars.par))
+			output <- paste(coefout, " (",varout,")", stars(coef,var), sep="")
+		else
+			output <- paste(coefout, " (",varout,")",sep="")
 		return(output)
 	}
 	# return
